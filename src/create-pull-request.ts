@@ -12,6 +12,7 @@ import * as utils from './utils'
 export interface Inputs {
   token: string
   path: string
+  addPaths: string[]
   commitMessage: string
   committer: string
   author: string
@@ -173,7 +174,8 @@ export async function createPullRequest(inputs: Inputs): Promise<void> {
       inputs.base,
       inputs.branch,
       branchRemoteName,
-      inputs.signoff
+      inputs.signoff,
+      inputs.addPaths
     )
     core.endGroup()
 
@@ -212,6 +214,7 @@ export async function createPullRequest(inputs: Inputs): Promise<void> {
       } else if (result.action == 'updated') {
         core.setOutput('pull-request-operation', 'updated')
       }
+      core.setOutput('pull-request-head-sha', result.headSha)
       // Deprecated
       core.exportVariable('PULL_REQUEST_NUMBER', pull.number)
       core.endGroup()
@@ -237,7 +240,7 @@ export async function createPullRequest(inputs: Inputs): Promise<void> {
         }
       }
     }
-  } catch (error) {
+  } catch (error: any) {
     core.setFailed(error.message)
   } finally {
     // Remove auth and restore persisted auth config if it existed
